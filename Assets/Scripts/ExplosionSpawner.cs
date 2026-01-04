@@ -1,18 +1,24 @@
 using UnityEngine;
 
-public class ExplosionSpawner : MonoBehaviour, IRayAction
+public class ExplosionSpawner
 {
-    [SerializeField] private Explosion _bangPrefab;
-    [SerializeField] private ExplosionForceEffect _explosionForceEffect;
+    private ExplosionForceEffect _explosionForceEffect;
+    private ExplosionVFX _explosionVFX;
 
-    private float _timeToDestroy = 1f;
-
-    public void Execute(CameraPointer cameraPointer)
+    public ExplosionSpawner(ExplosionVFX explosionVFX, ExplosionForceEffect explosionForceEffect)
     {
-        Vector3 position = cameraPointer.Hit.point;
-        GameObject explosion = Instantiate(_bangPrefab.gameObject, position, Quaternion.identity, transform);
-        _explosionForceEffect.ExplosionExecute(position);
+        _explosionVFX = explosionVFX;
+        _explosionForceEffect = explosionForceEffect;
+    }
 
-        Destroy(explosion, _timeToDestroy);
+    public void Execute(Ray ray)
+    {
+        if (Physics.Raycast(ray, out RaycastHit hit) == false)
+            return;
+
+        Vector3 position = hit.point;
+
+        _explosionVFX.SpawnEffect(position);
+        _explosionForceEffect.ExplosionExecute(position);
     }
 }

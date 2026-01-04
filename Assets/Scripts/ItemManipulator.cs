@@ -1,28 +1,43 @@
 using UnityEngine;
 
-public class ItemManipulator : MonoBehaviour, IRayAction
+public class ItemManipulator
 {
-    [SerializeField] private LayerMask _groundMask;
-    [SerializeField] private float _heightAboveGround = 2f;
+    private IGrabable _heldItem;
+    private LayerMask _groundMask;
+    private float _heightAboveGround;
 
-    private Rigidbody _heldItem;
-    public void Execute(CameraPointer cameraPointer)
+    public bool IsHoldingItem => _heldItem != null;
+
+    public ItemManipulator(LayerMask groundMask, float heightAboveGround)
     {
-        if (cameraPointer.Hit.rigidbody == null)
+        _groundMask = groundMask;
+        _heightAboveGround = heightAboveGround;
+    }
+
+    public void TryGrab(Ray ray)
+    {
+        if (_heldItem != null)
             return;
 
-        if (_heldItem == null)
+        if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            _heldItem = cameraPointer.Hit.rigidbody;
-            _heldItem.useGravity = false;
+            if (hit.collider.TryGetComponent<IGrabable>(out IGrabable grabable))
+            {
+                _heldItem = grabable;
+                _heldItem.OnGrab();
+            }
         }
+    }
 
-        Ray cameraRay = cameraPointer.CameraRay;
+    public void Move(Ray ray)
+    {
+        if (_heldItem == null)
+            return;
 
-        if(Physics.Raycast(cameraRay, out RaycastHit groundHit, Mathf.Infinity, _groundMask)) 
+        if (Physics.Raycast(ray, out RaycastHit groundHit, Mathf.Infinity, _groundMask))
         {
-            Vector3 targetPosition = cameraPointer.CameraRay.origin + cameraPointer.CameraRay.direction * (groundHit.distance - _heightAboveGround);
-            _heldItem.MovePosition(targetPosition);
+            Vector3 targetPosition = ray.origin + ray.direction * (groundHit.distance - _heightAboveGround);
+            _heldItem.Move(targetPosition);
         }
     }
 
@@ -31,8 +46,7 @@ public class ItemManipulator : MonoBehaviour, IRayAction
         if (_heldItem == null)
             return;
 
-        _heldItem.velocity = Vector3.zero;
-        _heldItem.useGravity = true;
+        _heldItem.OnRelease();
         _heldItem = null;
     }
 }

@@ -1,10 +1,15 @@
 using UnityEngine;
 
-public class ExplosionForceEffect : MonoBehaviour
+public class ExplosionForceEffect
 {
-    [SerializeField] private float _explosionForce;
-    [SerializeField] private float _explosionRadius;
-    //[SerializeField] private LayerMask _itemLayer;
+    private float _explosionForce;
+    private float _explosionRadius;
+
+    public ExplosionForceEffect(float explosionForce, float explosionRadius)
+    {
+        _explosionForce = explosionForce;
+        _explosionRadius = explosionRadius;
+    }
 
     public void ExplosionExecute(Vector3 explosionPosition)
     {

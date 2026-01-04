@@ -1,28 +1,23 @@
 using Cinemachine;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class CameraSwitcher : MonoBehaviour
+public class CameraSwitcher
 {
-    [SerializeField] private List<CinemachineVirtualCamera> _virtualCameras;
-    private CinemachineBrain _cinemachineBrain;
+    private Queue<CinemachineVirtualCamera> _virtualCameras;
 
-    private void Awake()
-    {
-        _cinemachineBrain = Camera.main.GetComponent<CinemachineBrain>();
-    }
+    private int _currentCameraPriority = 10;
+    private int _switchedOffCameraPriority = 0;
+
+    public CameraSwitcher(Queue<CinemachineVirtualCamera> virtualCameras) => _virtualCameras = virtualCameras;
 
     public void CameraSwitch()
     {
-        GetCinemachineVirtualCamera();
+        foreach (CinemachineVirtualCamera camera in _virtualCameras)
+            camera.Priority = _switchedOffCameraPriority;
 
-        foreach (CinemachineVirtualCamera virtualCamera in _virtualCameras)
-        {
-            if (virtualCamera.name == GetCinemachineVirtualCamera().name)
-                virtualCamera.gameObject.SetActive(false);
-            else
-                virtualCamera.gameObject.SetActive(true);
-        }
+        CinemachineVirtualCamera currentCamera = _virtualCameras.Dequeue();
+        _virtualCameras.Enqueue(currentCamera);
+
+        _virtualCameras.Peek().Priority = _currentCameraPriority;
     }
-    public GameObject GetCinemachineVirtualCamera() => _cinemachineBrain.ActiveVirtualCamera.VirtualCameraGameObject;
 }

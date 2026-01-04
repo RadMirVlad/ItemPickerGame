@@ -1,15 +1,20 @@
-using UnityEngine;
-
-public class CameraActionController : MonoBehaviour
+public class CameraActionController
 {
-    [SerializeField] private InputManager _inputManager;
-    [SerializeField] private CameraSwitcher _cameraSwitcher;
+    private InputManager _inputManager;
+    private CameraSwitcher _cameraSwitcher;
 
-    private void Update()
+    public CameraActionController(InputManager inputManager, CameraSwitcher cameraSwitcher)
+    {
+        _inputManager = inputManager;
+        _cameraSwitcher = cameraSwitcher;
+    }
+
+    public void Update()
     {
         if (_inputManager.CurrentAction != InputActionEnum.SwitchCamera)
             return;
 
         _cameraSwitcher.CameraSwitch();
     }
+
 }
